@@ -12,6 +12,7 @@ namespace Core.Scripts.Gameplay.Levels
         public LevelDifficultyType Difficulty { get; private set; }
         public Vector2Int GridSize { get; private set; }
         public LevelTileModel[] Tiles { get; private set; }
+        public LevelTileModel[,] TilesGrid { get; private set; }
         public LevelDataSo LevelData { get; private set; }
 
         public int RemainingMoveCount { get; private set; }
@@ -39,6 +40,9 @@ namespace Core.Scripts.Gameplay.Levels
             _tilesById.Clear();
             TotalMinionCount = 0;
             
+            // Initialize TilesGrid with GridSize dimensions
+            TilesGrid = new LevelTileModel[GridSize.x, GridSize.y];
+            
             var tileList = new List<LevelTileModel>();
             var idCounter = 0;
             
@@ -52,11 +56,14 @@ namespace Core.Scripts.Gameplay.Levels
                     var floorTile = new LevelTileModel(idCounter++, TileType.Floor, tileData.Coordinates);
                     tileList.Add(floorTile);
                     _tilesById[floorTile.Id] = floorTile;
+                    TilesGrid[tileData.Coordinates.x, tileData.Coordinates.y] = floorTile;
                 }
                 
                 var tileModel = new LevelTileModel(idCounter++, tileData.Type, tileData.Coordinates);
                 tileList.Add(tileModel);
                 _tilesById[tileModel.Id] = tileModel;
+                // Üstteki tile her zaman grid'de görünür (floor üstüne yazılır)
+                TilesGrid[tileData.Coordinates.x, tileData.Coordinates.y] = tileModel;
                 
                 if (tileData.Type == TileType.Minion)
                 {
