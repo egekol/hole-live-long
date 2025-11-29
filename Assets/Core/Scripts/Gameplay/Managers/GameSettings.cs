@@ -13,6 +13,7 @@ namespace Core.Scripts.Gameplay.Managers
         private void Awake()
         {
             SetInstances();
+            InitializeBindings();
         }
 
         private void SetInstances()

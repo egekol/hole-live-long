@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Core.Scripts.Gameplay.Items;
 using Core.Scripts.Gameplay.Levels;
 using Core.Scripts.Lib.Utility;
+using Lib.CustomAttributes.Scripts;
 using UnityEngine;
 
 namespace Core.Scripts.Gameplay.Managers
@@ -37,6 +38,13 @@ namespace Core.Scripts.Gameplay.Managers
         public IReadOnlyList<HoleItemView> HoleItems => _holeItems;
         public IReadOnlyList<MinionView> Minions => _minions;
 
+        [ProButton]
+        public void TestGenerateLevel(int index)
+        {
+            LevelManager.Instance.LoadLevel(index);
+            GenerateLevel(LevelManager.Instance.LevelModel);
+        }
+        
         public void GenerateLevel(LevelModel levelModel)
         {
             ClearLevel();
