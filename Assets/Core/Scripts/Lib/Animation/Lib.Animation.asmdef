@@ -1,0 +1,20 @@
+{
+    "name": "Lib.Animation",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:0ad9358329904d64adecece74470343e",
+        "GUID:029c1c1b674aaae47a6841a0b89ad80e",
+        "GUID:1e709f33341880b4e968bb2f35036c56",
+        "GUID:bd799f106fdc4ad98cf2a9eb91bc6c4d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

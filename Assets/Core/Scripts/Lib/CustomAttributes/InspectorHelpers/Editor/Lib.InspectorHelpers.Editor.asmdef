@@ -1,0 +1,19 @@
+{
+    "name": "Lib.InspectorHelpers.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Lib.InspectorHelpers.Scripts",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

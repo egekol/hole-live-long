@@ -1,0 +1,5 @@
+{
+	"name": "Lib.Tasks",
+	"rootNamespace": "Lib.Tasks",
+	"references":[ "GUID:2e0e91871b1a43b6ae5e1bb9baebf7e0", "GUID:af5af2cebb939cd43818bdf3050ff9a2", "GUID:f51ebe6a0ceec4240a699833d6309b23", "GUID:0ad9358329904d64adecece74470343e" ]
+}
