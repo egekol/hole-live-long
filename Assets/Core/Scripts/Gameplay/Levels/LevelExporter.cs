@@ -8,7 +8,7 @@ namespace Core.Scripts.Gameplay.Levels
 {
     public interface ILevelProvider
     {
-        IReadOnlyList<LevelDataSo> LevelDataList { get; }
+        LevelDataSo GetLevelData(int levelIndex);
     }
 
     public class LevelExporter : Singleton<LevelExporter>, ILevelProvider

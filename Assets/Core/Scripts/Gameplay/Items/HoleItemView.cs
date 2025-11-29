@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Scripts.Gameplay.Items
 {
-    public class HoleItemView : MonoBehaviour, ILocation, ITileItem
+    public class HoleItemView : MonoBehaviour, ITileItem
     {
         public LevelTileModel LevelTileModel { get; set; }
         public void SetTileModel(LevelTileModel tileModel)
@@ -16,9 +16,10 @@ namespace Core.Scripts.Gameplay.Items
         {
             gameObject.SetActive(isEnabled);
         }
+        
         public void ShowAnimation(float delay = 0)
         {
-            transform.localScale = Vector3.one*.2f;
+            transform.localScale = Vector3.zero;
             SetEnabled(true);
             transform.DOScale(Vector3.one, .3f).SetEase(Ease.OutBack).SetDelay(delay);
         }

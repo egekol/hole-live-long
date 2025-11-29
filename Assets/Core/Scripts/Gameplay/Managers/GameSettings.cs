@@ -1,4 +1,3 @@
-using System;
 using Core.Scripts.Gameplay.Levels;
 using Core.Scripts.Lib.Utility;
 
@@ -22,11 +21,14 @@ namespace Core.Scripts.Gameplay.Managers
             _levelProvider = LevelExporter.Instance;
         }
 
-
         public void InitializeBindings()
         {
             _levelManager.Initialize(_levelProvider);
         }
-        
+
+        public void InitializeGameBindings()
+        {
+            MovementManager.Instance.Initialize(LevelManager.Instance.LevelModel, LevelGenerator.Instance);
+        }
     }
 }

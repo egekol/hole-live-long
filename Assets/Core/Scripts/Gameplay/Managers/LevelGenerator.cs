@@ -7,7 +7,18 @@ using UnityEngine;
 
 namespace Core.Scripts.Gameplay.Managers
 {
-    public class LevelGenerator : Singleton<LevelGenerator>
+    public interface ILevelGenerator
+    {
+        IReadOnlyDictionary<int, FloorTileView> FloorTiles { get; }
+        IReadOnlyDictionary<int, WallTileView> WallTiles { get; }
+        IReadOnlyDictionary<int, SpikeTileView> SpikeTiles { get; }
+        IReadOnlyDictionary<int, HoleItemView> HoleItems { get; }
+        IReadOnlyDictionary<int, MinionView> Minions { get; }
+        IReadOnlyDictionary<int, ITileItem> AllLocationItems { get; }
+        void GenerateLevel(LevelModel levelModel);
+    }
+
+    public class LevelGenerator : Singleton<LevelGenerator>, ILevelGenerator
     {
         [SerializeField] private Transform _centerPoint;
         [SerializeField] private float _sizeOfTile;
@@ -24,16 +35,16 @@ namespace Core.Scripts.Gameplay.Managers
         [SerializeField] private Transform _itemsContainer;
 
         // Tile Dictionaries (key: LevelTileModel.Id)
-        private Dictionary<int, FloorTileView> _floorTiles = new Dictionary<int, FloorTileView>();
-        private Dictionary<int, WallTileView> _wallTiles = new Dictionary<int, WallTileView>();
-        private Dictionary<int, SpikeTileView> _spikeTiles = new Dictionary<int, SpikeTileView>();
+        private Dictionary<int, FloorTileView> _floorTiles = new();
+        private Dictionary<int, WallTileView> _wallTiles = new();
+        private Dictionary<int, SpikeTileView> _spikeTiles = new();
         
         // Item Dictionaries (key: LevelTileModel.Id)
-        private Dictionary<int, HoleItemView> _holeItems = new Dictionary<int, HoleItemView>();
-        private Dictionary<int, MinionView> _minions = new Dictionary<int, MinionView>();
+        private Dictionary<int, HoleItemView> _holeItems = new();
+        private Dictionary<int, MinionView> _minions = new();
 
         // All location items by ID
-        private Dictionary<int, ITileItem> _allLocationItems = new Dictionary<int, ITileItem>();
+        private Dictionary<int, ITileItem> _allLocationItems = new();
 
         public IReadOnlyDictionary<int, FloorTileView> FloorTiles => _floorTiles;
         public IReadOnlyDictionary<int, WallTileView> WallTiles => _wallTiles;
@@ -42,7 +53,6 @@ namespace Core.Scripts.Gameplay.Managers
         public IReadOnlyDictionary<int, MinionView> Minions => _minions;
         public IReadOnlyDictionary<int, ITileItem> AllLocationItems => _allLocationItems;
 
-        
         [ProButton]
         public void TestGenerateLevel(int index)
         {
@@ -62,10 +72,10 @@ namespace Core.Scripts.Gameplay.Managers
                 SpawnTile(tileModel, worldPosition);
             }
             
-            PlayShowAnimations(levelModel.GridSize);
+            PlayShowAnimations();
         }
 
-        private void PlayShowAnimations(Vector2Int gridSize)
+        private void PlayShowAnimations()
         {
             float delayPerDiagonal = 0.03f;
 

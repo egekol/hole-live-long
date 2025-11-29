@@ -6,9 +6,9 @@ namespace Core.Scripts.Gameplay.Managers
 {
     public class LevelManager : Singleton<LevelManager>
     {
-        private LevelExporter _levelProvider;
+        private ILevelProvider _levelProvider;
 
-        public LevelModel LevelModel { get; set; }
+        public LevelModel LevelModel { get; private set; }
 
         public void LoadLevel(int levelIndex)
         {
@@ -21,7 +21,7 @@ namespace Core.Scripts.Gameplay.Managers
             LevelModel.InitializeLevel(levelData);
         }
 
-        public void Initialize(LevelExporter levelProvider)
+        public void Initialize(ILevelProvider levelProvider)
         {
             _levelProvider = levelProvider;
             LevelModel = new LevelModel();

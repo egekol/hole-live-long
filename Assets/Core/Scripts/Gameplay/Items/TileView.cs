@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Scripts.Gameplay.Items
 {
-    public class TileView : MonoBehaviour, ITileItem, ILocation
+    public class TileView : MonoBehaviour, ITileItem
     {
         private void SetEnabled(bool isEnabled)
         {
@@ -13,15 +13,14 @@ namespace Core.Scripts.Gameplay.Items
 
         public void ShowAnimation(float delay = 0f)
         {
-            transform.localScale = Vector3.one*.2f;
+            transform.localScale = Vector3.zero;
             SetEnabled(true);
             transform.DOScale(Vector3.one, .3f).SetEase(Ease.OutBack).SetDelay(delay);
         }
         
         public void HideAnimation(float delay = 0f)
         {
-            transform.DOScale(Vector3.zero, .2f).SetEase(Ease.InBack).SetDelay(delay)
-                .OnComplete(() =>
+            transform.DOScale(Vector3.zero, .2f).SetEase(Ease.InBack).SetDelay(delay).OnComplete(() =>
             {
                 SetEnabled(false);
             });
