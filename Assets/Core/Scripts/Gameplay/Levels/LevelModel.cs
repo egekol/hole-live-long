@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Scripts.Gameplay.Levels
@@ -17,6 +18,10 @@ namespace Core.Scripts.Gameplay.Levels
         public int CollectedCoinCount { get; private set; }
         public int CollectedMinionCount { get; private set; }
 
+        // Dictionary to access tiles by their unique ID
+        private Dictionary<int, LevelTileModel> _tilesById = new Dictionary<int, LevelTileModel>();
+        public IReadOnlyDictionary<int, LevelTileModel> TilesById => _tilesById;
+
         public void InitializeLevel(LevelDataSo levelData)
         {
             LevelData = levelData;
@@ -31,25 +36,48 @@ namespace Core.Scripts.Gameplay.Levels
 
         private void SetTileModelList(LevelDataSo levelData)
         {
+            _tilesById.Clear();
             TotalMinionCount = 0;
-            Tiles = new LevelTileModel[levelData.Tiles.Length];
+            
+            var tileList = new List<LevelTileModel>();
+            var idCounter = 0;
+            
             for (int i = 0; i < levelData.Tiles.Length; i++)
             {
-                Tiles[i] = new LevelTileModel
+                var tileData = levelData.Tiles[i];
+                
+                // Hole, Minion, Collectable, Spike altına floor ekle
+                if (RequiresFloorUnderneath(tileData.Type))
                 {
-                    Type = levelData.Tiles[i].Type,
-                    Coordinates = levelData.Tiles[i].Coordinates
-                };
-                TryIncreaseMinionCount(levelData, i);
+                    var floorTile = new LevelTileModel(idCounter++, TileType.Floor, tileData.Coordinates);
+                    tileList.Add(floorTile);
+                    _tilesById[floorTile.Id] = floorTile;
+                }
+                
+                var tileModel = new LevelTileModel(idCounter++, tileData.Type, tileData.Coordinates);
+                tileList.Add(tileModel);
+                _tilesById[tileModel.Id] = tileModel;
+                
+                if (tileData.Type == TileType.Minion)
+                {
+                    TotalMinionCount++;
+                }
             }
+            
+            Tiles = tileList.ToArray();
         }
 
-        private void TryIncreaseMinionCount(LevelDataSo levelData, int i)
+        private bool RequiresFloorUnderneath(TileType type)
         {
-            if (levelData.Tiles[i].Type == TileType.Minion)
-            {
-                TotalMinionCount++;
-            }
+            return type == TileType.Hole || 
+                   type == TileType.Minion || 
+                   type == TileType.Collectable || 
+                   type == TileType.Spike;
+        }
+
+        public LevelTileModel GetTileById(int id)
+        {
+            return _tilesById.TryGetValue(id, out var tile) ? tile : null;
         }
 
         public void ReloadLevel()

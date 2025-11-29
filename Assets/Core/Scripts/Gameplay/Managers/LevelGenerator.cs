@@ -23,22 +23,26 @@ namespace Core.Scripts.Gameplay.Managers
         [SerializeField] private Transform _tilesContainer;
         [SerializeField] private Transform _itemsContainer;
 
-        // Tile Lists
-        private List<FloorTileView> _floorTiles = new List<FloorTileView>();
-        private List<WallTileView> _wallTiles = new List<WallTileView>();
-        private List<SpikeTileView> _spikeTiles = new List<SpikeTileView>();
+        // Tile Dictionaries (key: LevelTileModel.Id)
+        private Dictionary<int, FloorTileView> _floorTiles = new Dictionary<int, FloorTileView>();
+        private Dictionary<int, WallTileView> _wallTiles = new Dictionary<int, WallTileView>();
+        private Dictionary<int, SpikeTileView> _spikeTiles = new Dictionary<int, SpikeTileView>();
         
-        // Item Lists
-        private List<HoleItemView> _holeItems = new List<HoleItemView>();
-        private List<MinionView> _minions = new List<MinionView>();
+        // Item Dictionaries (key: LevelTileModel.Id)
+        private Dictionary<int, HoleItemView> _holeItems = new Dictionary<int, HoleItemView>();
+        private Dictionary<int, MinionView> _minions = new Dictionary<int, MinionView>();
 
-        public IReadOnlyList<FloorTileView> FloorTiles => _floorTiles;
-        public IReadOnlyList<WallTileView> WallTiles => _wallTiles;
-        public IReadOnlyList<SpikeTileView> SpikeTiles => _spikeTiles;
-        public IReadOnlyList<HoleItemView> HoleItems => _holeItems;
-        public IReadOnlyList<MinionView> Minions => _minions;
+        // All location items by ID
+        private Dictionary<int, ITileItem> _allLocationItems = new Dictionary<int, ITileItem>();
 
-        public IReadOnlyDictionary<int, LevelTileModel> LocationModels { get; set; }
+        public IReadOnlyDictionary<int, FloorTileView> FloorTiles => _floorTiles;
+        public IReadOnlyDictionary<int, WallTileView> WallTiles => _wallTiles;
+        public IReadOnlyDictionary<int, SpikeTileView> SpikeTiles => _spikeTiles;
+        public IReadOnlyDictionary<int, HoleItemView> HoleItems => _holeItems;
+        public IReadOnlyDictionary<int, MinionView> Minions => _minions;
+        public IReadOnlyDictionary<int, ITileItem> AllLocationItems => _allLocationItems;
+
+        
         [ProButton]
         public void TestGenerateLevel(int index)
         {
@@ -56,6 +60,22 @@ namespace Core.Scripts.Gameplay.Managers
             {
                 Vector3 worldPosition = CalculateWorldPosition(tileModel.Coordinates, gridCenter);
                 SpawnTile(tileModel, worldPosition);
+            }
+            
+            PlayShowAnimations(levelModel.GridSize);
+        }
+
+        private void PlayShowAnimations(Vector2Int gridSize)
+        {
+            float delayPerDiagonal = 0.03f;
+
+            foreach (var item in _allLocationItems.Values)
+            {
+                var coords = item.LevelTileModel.Coordinates;
+                // Diagonal distance from top-left corner (0,0)
+                int diagonalDistance = coords.x + coords.y;
+                float delay = diagonalDistance * delayPerDiagonal;
+                item.ShowAnimation(delay);
             }
         }
 
@@ -78,13 +98,13 @@ namespace Core.Scripts.Gameplay.Managers
             switch (tileModel.Type)
             {
                 case TileType.Floor:
+                case TileType.Ice:
                     SpawnFloorTile(tileModel, position);
                     break;
                 case TileType.Wall:
                     SpawnWallTile(tileModel, position);
                     break;
                 case TileType.Minion:
-                    SpawnFloorTile(tileModel, position); // Minion altına floor ekle
                     SpawnMinion(tileModel, position);
                     break;
                 case TileType.Hole:
@@ -93,11 +113,8 @@ namespace Core.Scripts.Gameplay.Managers
                 case TileType.Spike:
                     SpawnSpikeTile(tileModel, position);
                     break;
-                case TileType.Ice:
-                    SpawnFloorTile(tileModel, position); // Ice için şimdilik floor kullan
-                    break;
                 case TileType.Collectable:
-                    SpawnFloorTile(tileModel, position); // Collectable altına floor ekle
+                    // TODO: Collectable prefab eklendiğinde spawn edilecek
                     break;
             }
         }
@@ -106,54 +123,65 @@ namespace Core.Scripts.Gameplay.Managers
         {
             var floorTile = Instantiate(_floorTilePrefab, position, Quaternion.identity, _tilesContainer);
             floorTile.SetTileModel(tileModel);
-            _floorTiles.Add(floorTile);
+            _floorTiles[tileModel.Id] = floorTile;
+            _allLocationItems[tileModel.Id] = floorTile;
         }
 
         private void SpawnWallTile(LevelTileModel tileModel, Vector3 position)
         {
             var wallTile = Instantiate(_wallTileView, position, Quaternion.identity, _tilesContainer);
             wallTile.SetTileModel(tileModel);
-            _wallTiles.Add(wallTile);
+            _wallTiles[tileModel.Id] = wallTile;
+            _allLocationItems[tileModel.Id] = wallTile;
         }
 
         private void SpawnSpikeTile(LevelTileModel tileModel, Vector3 position)
         {
             var spikeTile = Instantiate(_spikeTileView, position, Quaternion.identity, _tilesContainer);
             spikeTile.SetTileModel(tileModel);
-            _spikeTiles.Add(spikeTile);
+            _spikeTiles[tileModel.Id] = spikeTile;
+            _allLocationItems[tileModel.Id] = spikeTile;
         }
 
         private void SpawnHoleItem(LevelTileModel tileModel, Vector3 position)
         {
             var holeItem = Instantiate(_holeItemView, position, Quaternion.identity, _itemsContainer);
             holeItem.SetTileModel(tileModel);
-            _holeItems.Add(holeItem);
+            _holeItems[tileModel.Id] = holeItem;
+            _allLocationItems[tileModel.Id] = holeItem;
         }
 
         private void SpawnMinion(LevelTileModel tileModel, Vector3 position)
         {
             var minion = Instantiate(_minionView, position, Quaternion.identity, _itemsContainer);
             minion.SetTileModel(tileModel);
-            _minions.Add(minion);
+            _minions[tileModel.Id] = minion;
+            _allLocationItems[tileModel.Id] = minion;
+        }
+
+        public ITileItem GetLocationById(int id)
+        {
+            return _allLocationItems.TryGetValue(id, out var location) ? location : null;
         }
 
         public void ClearLevel()
         {
-            ClearList(_floorTiles);
-            ClearList(_wallTiles);
-            ClearList(_spikeTiles);
-            ClearList(_holeItems);
-            ClearList(_minions);
+            ClearDictionary(_floorTiles);
+            ClearDictionary(_wallTiles);
+            ClearDictionary(_spikeTiles);
+            ClearDictionary(_holeItems);
+            ClearDictionary(_minions);
+            _allLocationItems.Clear();
         }
 
-        private void ClearList<T>(List<T> list) where T : MonoBehaviour
+        private void ClearDictionary<T>(Dictionary<int, T> dictionary) where T : MonoBehaviour
         {
-            foreach (var item in list)
+            foreach (var kvp in dictionary)
             {
-                if (item != null)
-                    Destroy(item.gameObject);
+                if (kvp.Value != null)
+                    Destroy(kvp.Value.gameObject);
             }
-            list.Clear();
+            dictionary.Clear();
         }
     }
 }

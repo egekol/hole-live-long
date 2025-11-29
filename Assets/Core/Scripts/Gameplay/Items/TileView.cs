@@ -34,7 +34,7 @@ namespace Core.Scripts.Gameplay.Items
         }
     }
 
-    public interface ITileItem
+    public interface ITileItem : ILocation
     {
         void ShowAnimation(float delay = 0f);
         void HideAnimation(float delay = 0f);
