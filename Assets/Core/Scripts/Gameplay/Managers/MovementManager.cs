@@ -177,6 +177,9 @@ namespace Core.Scripts.Gameplay.Managers
             var holeTargets = CalculateHoleTargets(directionVector);
             var finalHolePositions = new HashSet<Vector2Int>();
             
+            // Hole'ların geçtiği TÜM yolları hesapla (başlangıçtan hedefe kadar)
+            var holePathPositions = new HashSet<Vector2Int>();
+            
             // Hole'ların orijinal pozisyonlarını da tut (final pozisyon -> orijinal pozisyon)
             var holeOriginalPositions = new Dictionary<Vector2Int, Vector2Int>();
             foreach (var kvp in holeTargets)
@@ -185,10 +188,25 @@ namespace Core.Scripts.Gameplay.Managers
                 var finalPos = kvp.Value.targetCoord;
                 finalHolePositions.Add(finalPos);
                 
-                // Orijinal pozisyonu bul
+                // Orijinal pozisyonu ve path'ini bul
                 if (_levelGenerator.HoleItems.TryGetValue(holeId, out var hole))
                 {
-                    holeOriginalPositions[finalPos] = hole.LevelTileModel.Coordinates;
+                    var startPos = hole.LevelTileModel.Coordinates;
+                    holeOriginalPositions[finalPos] = startPos;
+
+                    // Hole'un path'ini ekle (başlangıçtan hedefe kadar tüm koordinatlar)
+                    var currentPos = startPos;
+                    holePathPositions.Add(startPos);
+
+                    var distance = kvp.Value.distance;
+                    for (int i = 0; i < distance; i++)
+                    {
+                        currentPos += directionVector;
+                        holePathPositions.Add(currentPos);
+                    }
+
+                    // Güvenlik için final pozisyonu da ekle
+                    holePathPositions.Add(finalPos);
                 }
             }
             
@@ -261,6 +279,7 @@ namespace Core.Scripts.Gameplay.Managers
                 
                 // Hole pozisyonunda stacking kontrolü:
                 // Sadece hole önümüzdeyse (orijinal pozisyon hareket yönünde) stack'e izin ver
+                bool isOnHolePath = holePathPositions.Contains(targetCoord);
                 bool shouldAllowStacking = false;
                 if (finalHolePositions.Contains(targetCoord) && 
                     holeOriginalPositions.TryGetValue(targetCoord, out var originalPos))
@@ -268,7 +287,8 @@ namespace Core.Scripts.Gameplay.Managers
                     shouldAllowStacking = IsPositionInFront(currentCoord, originalPos, directionVector);
                 }
                 
-                if (!shouldAllowStacking)
+                // Hole path'indeki (hole'a düşecek) minion'lar diğer minion'ları bloklamasın
+                if (!shouldAllowStacking && !isOnHolePath)
                 {
                     occupiedByMinions.Add(targetCoord);
                 }

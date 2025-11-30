@@ -646,6 +646,8 @@ MonoBehaviour:
     type: 3}
   _minionView: {fileID: 7719059914683014700, guid: 23ee319d8f1cb4a00a3f4650970702fb,
     type: 3}
+  _collectableItemView: {fileID: 5110931462799815804, guid: b9c1f050282a043ada1f57b16a1a9b85,
+    type: 3}
   _tilesContainer: {fileID: 1760986458}
   _itemsContainer: {fileID: 1314747763}
   _holeAnimShakeDuration: 0.4
