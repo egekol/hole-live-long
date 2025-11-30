@@ -111,7 +111,7 @@ Material:
     - _FlipbookMode: 0
     - _Float: 3
     - _Float_Power: 1
-    - _Fresnel_Float_Power: 2.92
+    - _Fresnel_Float_Power: 1.99
     - _Fresnel_Power: -1.8
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -146,8 +146,8 @@ Material:
     - _ColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Fresnel_Color: {r: 0, g: 0.8180354, b: 1, a: 0}
-    - _Fresnel_Color_1: {r: 2.6390157, g: 0.54895234, b: 0, a: 1}
-    - _Fresnel_Color_2: {r: 4.0472007, g: 0.06356848, b: 2.4940536, a: 1}
+    - _Fresnel_Color_1: {r: 0.9112214, g: 1.1342617, b: 4.703873, a: 1}
+    - _Fresnel_Color_2: {r: 0, g: 5.4033303, b: 4.2643886, a: 1}
     - _NoiseScroll: {r: 0, g: 0, b: 0, a: 0}
     - _Noise_Tilig: {r: 1, g: 1.46, b: 0, a: 0}
     - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}
