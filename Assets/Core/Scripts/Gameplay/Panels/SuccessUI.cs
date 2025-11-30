@@ -1,4 +1,3 @@
-using Core.Scripts.Gameplay.Levels;
 using Core.Scripts.Gameplay.Managers;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -11,6 +10,7 @@ namespace Core.Scripts.Gameplay.Panels
     public class SuccessUI : MonoBehaviour
     {
         [SerializeField] private Button nextLevelButton;
+        [SerializeField] private Button _replyButton;
         [SerializeField] private TextMeshProUGUI _energyCountTMP;
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private Transform _starOne;
@@ -21,6 +21,7 @@ namespace Core.Scripts.Gameplay.Panels
         private void OnEnable()
         {
             nextLevelButton.onClick.AddListener(OnNextLevelClicked);
+            
         }
         
         private void OnDisable()

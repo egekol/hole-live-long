@@ -17,6 +17,7 @@ namespace Core.Scripts.Gameplay.Managers
         private InGameUI _inGameUI;
         private LevelGenerator _levelGenerator;
         private InputManager _inputManager;
+        private CameraManager _cameraManager;
 
         private void Awake()
         {
@@ -43,6 +44,7 @@ namespace Core.Scripts.Gameplay.Managers
             _backgroundUI = BackgroundUI.Instance;
             _inputManager = InputManager.Instance;
             _inGameUI = InGameUI.Instance;
+            _cameraManager = CameraManager.Instance;
             OnGameSceneInitialized();
         }
 
@@ -61,6 +63,7 @@ namespace Core.Scripts.Gameplay.Managers
             await UniTask.WaitForSeconds(.9f);
 
             _levelManager.LoadCurrentLevel();
+            _cameraManager.AdjustCameraForGridWidth(_levelManager.LevelModel.GridSize.x);
             _inGameUI.InitializeHeader(_levelManager.LevelModel);
             _inputManager.SetInputState(InputState.Disabled);
             _levelGenerator.GenerateLevel(LevelManager.Instance.LevelModel);
