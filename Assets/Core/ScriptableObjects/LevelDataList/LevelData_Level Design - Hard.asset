@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LevelName: Level Design - Hard
   LevelIndex: 0
-  MoveCount: 0
+  MoveCount: 12
+  OneStarMinMoves: 0
+  TwoStarMinMoves: 0
+  ThreeStarMinMoves: 0
   Difficulty: 2
   GridSize: {x: 13, y: 12}
   Tiles:

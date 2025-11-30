@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Core.Scripts.Gameplay.Items;
 using Core.Scripts.Gameplay.Levels;
 using Core.Scripts.Lib.Utility;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Lib.CustomAttributes.Scripts;
 using UnityEngine;
 
@@ -34,6 +36,13 @@ namespace Core.Scripts.Gameplay.Managers
         [Header("Containers")]
         [SerializeField] private Transform _tilesContainer;
         [SerializeField] private Transform _itemsContainer;
+
+        [Header("Hole Animation Settings")]
+        [SerializeField] private float _holeAnimShakeDuration = 0.3f;
+        [SerializeField] private float _holeAnimMoveDuration = 0.5f;
+        [SerializeField] private float _holeAnimJumpHeight = 0.5f;
+        [SerializeField] private float _holeAnimDelayPerItem = 0.04f;
+        [SerializeField] private float _holeAnimScaleDownTime = 0.2f;
 
         // Tile Dictionaries (key: LevelTileModel.Id)
         private Dictionary<int, FloorTileView> _floorTiles = new();
@@ -233,6 +242,99 @@ namespace Core.Scripts.Gameplay.Managers
                     minion.Kill();
                 }
             }
+        }
+
+        public async UniTask MoveBlocksToHoleAnimation()
+        {
+            // Hole bulunamazsa çık
+            if (_holeItems.Count == 0) return;
+            
+            // İlk hole'un pozisyonunu al
+            HoleItemView hole = null;
+            Vector3 holePosition = Vector3.zero;
+            foreach (var holeItem in _holeItems.Values)
+            {
+                hole = holeItem;
+                holePosition = holeItem.transform.position;
+                break;
+            }
+            
+            if (hole == null) return;
+            
+            // Hole hariç tüm item'ları topla ve hole'a uzaklığa göre sırala
+            var itemsToAnimate = new List<(ITileItem item, float distance, Transform transform)>();
+            foreach (var item in _allLocationItems.Values)
+            {
+                if (item is HoleItemView) continue;
+                
+                var itemTransform = (item as MonoBehaviour)?.transform;
+                if (itemTransform == null) continue;
+                
+                float distance = Vector3.Distance(itemTransform.position, holePosition);
+                itemsToAnimate.Add((item, distance, itemTransform));
+            }
+            
+            // Uzaklığa göre sırala (en yakın en önce)
+            itemsToAnimate.Sort((a, b) => a.distance.CompareTo(b.distance));
+            
+            // Tüm item'ları shake et
+            foreach (var (item, distance, itemTransform) in itemsToAnimate)
+            {
+                itemTransform.DOShakePosition(_holeAnimShakeDuration, 0.1f, 20, 90, false, true)
+                    .SetLink(itemTransform.gameObject);
+            }
+            
+            await UniTask.WaitForSeconds(_holeAnimShakeDuration);
+            
+            // Uzaklık sırasına göre hole'a doğru hareket ettir
+            float maxDelay = 0f;
+            for (int i = 0; i < itemsToAnimate.Count; i++)
+            {
+                var (item, distance, itemTransform) = itemsToAnimate[i];
+                float delay = i * _holeAnimDelayPerItem;
+                maxDelay = delay;
+                
+                // Jump ile hole'a git
+                var sequence = DOTween.Sequence();
+                sequence.SetDelay(delay);
+                sequence.Append(itemTransform.DOJump(holePosition, _holeAnimJumpHeight, 1, _holeAnimMoveDuration)
+                    .SetEase(Ease.InQuad));
+                
+                // Son 0.2 saniye kala scale down
+                sequence.Insert(delay + _holeAnimMoveDuration - _holeAnimScaleDownTime, 
+                    itemTransform.DOScale(Vector3.zero, _holeAnimScaleDownTime).SetEase(Ease.InBack));
+                
+                // Animasyon bitince yok et
+                sequence.OnComplete(() =>
+                {
+                    var go = itemTransform?.gameObject;
+                    if (go != null)
+                    {
+                        Destroy(go);
+                    }
+                });
+                
+                sequence.SetLink(itemTransform.gameObject);
+            }
+            
+            // Tüm animasyonların bitmesini bekle
+            await UniTask.WaitForSeconds(maxDelay + _holeAnimMoveDuration + 0.1f);
+            
+            // Hole'u yok et
+            if (hole != null)
+            {
+                hole.transform.DOScale(Vector3.zero, 0.3f)
+                    .SetEase(Ease.InBack)
+                    .OnComplete(() =>
+                    {
+                        if (hole != null)
+                        {
+                            Destroy(hole.gameObject);
+                        }
+                    });
+            }
+            
+            await UniTask.WaitForSeconds(0.4f);
         }
     }
 }

@@ -648,6 +648,11 @@ MonoBehaviour:
     type: 3}
   _tilesContainer: {fileID: 1760986458}
   _itemsContainer: {fileID: 1314747763}
+  _holeAnimShakeDuration: 0.4
+  _holeAnimMoveDuration: 0.3
+  _holeAnimJumpHeight: 0.5
+  _holeAnimDelayPerItem: 0.01
+  _holeAnimScaleDownTime: 0.2
 --- !u!1 &1760986457
 GameObject:
   m_ObjectHideFlags: 0

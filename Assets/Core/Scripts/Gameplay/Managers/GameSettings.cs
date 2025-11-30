@@ -138,11 +138,17 @@ namespace Core.Scripts.Gameplay.Managers
         private void OnSuccess()
         {
             StopLevel();
-            InGameUI.Instance.ShowSuccessUI();
+            PlayLevelCompleteAnimation().Forget();
             LogHelper.Log("Success");
             // TODO: SuccessUI göster
         }
-        
+
+        private async UniTask PlayLevelCompleteAnimation()
+        {
+            await  _levelGenerator.MoveBlocksToHoleAnimation();
+            InGameUI.Instance.ShowSuccessUI();
+        }
+
         private void OnFail()
         {
             StopLevel();
@@ -189,7 +195,7 @@ namespace Core.Scripts.Gameplay.Managers
         public async UniTask LoadNextLevel()
         {
             _inputManager.SetInputState(InputState.Disabled);
-            _levelGenerator.PlayHideAnimations().Forget();
+            // _levelGenerator.PlayHideAnimations().Forget();
             await _inGameUI.HideAsync();
             _backgroundUI.BlockViewWithCanvas();
             _levelManager.IncreaseLevel();

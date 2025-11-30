@@ -8,6 +8,9 @@ namespace Core.Scripts.Gameplay.Levels
         public string LevelName;
         public int LevelIndex;
         public int MoveCount;
+        public int OneStarMinMoves;
+        public int TwoStarMinMoves;
+        public int ThreeStarMinMoves;
         public LevelDifficultyType Difficulty;
         public Vector2Int GridSize;
         public LevelTileData[] Tiles;

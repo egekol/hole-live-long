@@ -15,15 +15,15 @@ namespace Core.Scripts.Gameplay.Panels
         
         private void OnEnable()
         {
-            nextLevelButton.onClick.AddListener(OnRetryButtonClicked);
+            nextLevelButton.onClick.AddListener(OnNextLevelClicked);
         }
         
         private void OnDisable()
         {
-            nextLevelButton.onClick.RemoveListener(OnRetryButtonClicked);
+            nextLevelButton.onClick.RemoveListener(OnNextLevelClicked);
         }
 
-        private void OnRetryButtonClicked()
+        private void OnNextLevelClicked()
         {
             GameSettings.Instance.LoadNextLevel().Forget();
         }
