@@ -119,6 +119,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BlackHole Particle
       objectReference: {fileID: 0}
+    - target: {fileID: 1096940629629520075, guid: efd6a0848ded25c4093b8a45b971a5bc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6443524011148862664, guid: efd6a0848ded25c4093b8a45b971a5bc,
         type: 3}
       propertyPath: m_LocalPosition.x
