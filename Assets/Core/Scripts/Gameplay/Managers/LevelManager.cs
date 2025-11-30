@@ -47,7 +47,8 @@ namespace Core.Scripts.Gameplay.Managers
             LevelModel.RemoveTile(minionId);
             
             LevelGenerator.Instance.DestroyMinion(minionId);
-            CollectMinionCount();
+            // Not: CollectMinionCount artık PreCollectMinions ile hareket hesaplaması sırasında çağrılıyor
+            // Bu sayede level complete kontrolü animasyon bitmeden önce doğru çalışıyor
             
             LogHelper.Log($"Minion removed: {minionId}");
         }
@@ -55,6 +56,19 @@ namespace Core.Scripts.Gameplay.Managers
         private void CollectMinionCount()
         {
             LevelModel.CollectMinion();
+        }
+
+        /// <summary>
+        /// Animasyon başlamadan önce hole'a düşecek minion'ları önceden sayar.
+        /// Bu, level complete kontrolünün doğru çalışması için gereklidir.
+        /// </summary>
+        public void PreCollectMinions(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                LevelModel.CollectMinion();
+            }
+            LogHelper.Log($"Pre-collected {count} minions");
         }
 
         public void DecreaseMoveCount()

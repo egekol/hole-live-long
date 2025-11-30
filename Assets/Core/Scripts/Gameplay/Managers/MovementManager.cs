@@ -58,11 +58,35 @@ namespace Core.Scripts.Gameplay.Managers
             var moveTasks = new List<UniTask>();
             var directionVector = GetDirectionVector(direction);
 
+            // Hole'ların hedef pozisyonlarını hesapla
+            var holeTargets = CalculateHoleTargets(directionVector);
+            
+            // Hole'ların final pozisyonlarını set olarak tut
+            var finalHolePositions = new HashSet<Vector2Int>();
+            foreach (var kvp in holeTargets)
+            {
+                finalHolePositions.Add(kvp.Value.targetCoord);
+            }
+
             // Minion'ların hedef pozisyonlarını hesapla
             var minionTargets = CalculateMinionTargets(directionVector);
             
-            // Hole'ların hedef pozisyonlarını hesapla
-            var holeTargets = CalculateHoleTargets(directionVector);
+            // Hole'a düşecek minion sayısını hesapla ve önceden collect et
+            // Not: Minion hareket etmese bile (distance = 0), hole onun üzerine gelebilir
+            int minionsToFallInHole = 0;
+            foreach (var kvp in minionTargets)
+            {
+                var (targetCoord, _) = kvp.Value;
+                if (finalHolePositions.Contains(targetCoord))
+                {
+                    minionsToFallInHole++;
+                }
+            }
+            
+            if (minionsToFallInHole > 0)
+            {
+                LevelManager.Instance.PreCollectMinions(minionsToFallInHole);
+            }
 
             // Minion hareketlerini başlat
             foreach (var kvp in minionTargets)
@@ -122,6 +146,14 @@ namespace Core.Scripts.Gameplay.Managers
             var targets = new Dictionary<int, (Vector2Int, int)>();
             var minions = _levelGenerator.Minions;
             
+            // Önce hole'ların hareket sonrası pozisyonlarını hesapla
+            var holeTargets = CalculateHoleTargets(directionVector);
+            var finalHolePositions = new HashSet<Vector2Int>();
+            foreach (var kvp in holeTargets)
+            {
+                finalHolePositions.Add(kvp.Value.targetCoord);
+            }
+            
             // Hareket yönüne göre minion'ları sırala (önce en uzaktakiler hareket etsin)
             var sortedMinions = new List<(int id, MinionView minion)>();
             foreach (var kvp in minions)
@@ -129,7 +161,7 @@ namespace Core.Scripts.Gameplay.Managers
                 sortedMinions.Add((kvp.Key, kvp.Value));
             }
             
-            // Hareket yönüne göre sıralama (arkadakiler önce hesaplanır)
+            // Hareket yönüne göre sıralama (öndekiler önce hesaplanır)
             sortedMinions.Sort((a, b) =>
             {
                 var coordA = a.minion.LevelTileModel.Coordinates;
@@ -167,7 +199,8 @@ namespace Core.Scripts.Gameplay.Managers
                         break;
 
                     // Diğer minion kontrolü (minion'lar birbirinin içinden geçemez)
-                    if (occupiedByMinions.Contains(nextCoord))
+                    // Ancak hedef pozisyon hole ise, minion düşeceği için bloklanmaz
+                    if (occupiedByMinions.Contains(nextCoord) && !finalHolePositions.Contains(nextCoord))
                         break;
 
                     // Spike ve Collectable içinden geçebilir
@@ -176,7 +209,13 @@ namespace Core.Scripts.Gameplay.Managers
                 }
 
                 targets[id] = (targetCoord, distance);
-                occupiedByMinions.Add(targetCoord);
+                
+                // Sadece hole pozisyonu değilse occupied olarak işaretle
+                // Hole pozisyonunda minion düşeceği için diğer minion'lar da oraya gidebilmeli
+                if (!finalHolePositions.Contains(targetCoord))
+                {
+                    occupiedByMinions.Add(targetCoord);
+                }
             }
 
             return targets;
