@@ -176,7 +176,7 @@ namespace Core.Scripts.Gameplay.Managers
             // Önce hole'ların hareket sonrası pozisyonlarını hesapla
             var holeTargets = CalculateHoleTargets(directionVector);
             var finalHolePositions = new HashSet<Vector2Int>();
-
+            
             // Hole'ların geçtiği TÜM yolları hesapla (başlangıçtan hedefe kadar)
             var holePathPositions = new HashSet<Vector2Int>();
             
@@ -216,19 +216,18 @@ namespace Core.Scripts.Gameplay.Managers
             {
                 sortedMinions.Add((kvp.Key, kvp.Value));
             }
-
-            // Hareket yönüne göre sıralama
-            // Not: Projeksiyon (dot product) kullanarak, hareket yönünde ÖNDE olan minion'lar önce hesaplanır.
+            
+            // Hareket yönüne göre sıralama (öndekiler önce hesaplanır)
             sortedMinions.Sort((a, b) =>
             {
                 var coordA = a.minion.LevelTileModel.Coordinates;
                 var coordB = b.minion.LevelTileModel.Coordinates;
-
-                int projA = coordA.x * directionVector.x + coordA.y * directionVector.y;
-                int projB = coordB.x * directionVector.x + coordB.y * directionVector.y;
-
-                // projB > projA ise b, a'dan daha öndedir → önce b gelmeli
-                return projB.CompareTo(projA);
+                
+                if (directionVector.x != 0)
+                    return directionVector.x > 0 ? coordB.x.CompareTo(coordA.x) : coordA.x.CompareTo(coordB.x);
+                if (directionVector.y != 0)
+                    return directionVector.y > 0 ? coordB.y.CompareTo(coordA.y) : coordA.y.CompareTo(coordB.y);
+                return 0;
             });
 
             // Her minion için hedef pozisyon hesapla
@@ -288,9 +287,8 @@ namespace Core.Scripts.Gameplay.Managers
                     shouldAllowStacking = IsPositionInFront(currentCoord, originalPos, directionVector);
                 }
                 
-                // Hole path'indeki ve hareket etmeyen (distance == 0) minion'lar
-                // arkadan gelenleri bloklamasın; diğerleri normal şekilde bloklasın.
-                if (!shouldAllowStacking && !(isOnHolePath && distance == 0))
+                // Hole path'indeki (hole'a düşecek) minion'lar diğer minion'ları bloklamasın
+                if (!shouldAllowStacking && !isOnHolePath)
                 {
                     occupiedByMinions.Add(targetCoord);
                 }
