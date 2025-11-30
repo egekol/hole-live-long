@@ -1,3 +1,4 @@
+using Core.Scripts.Gameplay.Inputs;
 using Core.Scripts.Gameplay.Levels;
 using Core.Scripts.Gameplay.Managers;
 using Cysharp.Threading.Tasks;
@@ -43,14 +44,54 @@ namespace Core.Scripts.Gameplay.Items
 
         public UniTaskCompletionSource Move(Vector3 targetPosition, int distance)
         {
+            return Move(targetPosition, distance, InputDirection.None);
+        }
+
+        public UniTaskCompletionSource Move(Vector3 targetPosition, int distance, InputDirection direction)
+        {
             _moveCompletionSource = new UniTaskCompletionSource();
             
             float duration = distance * MovementManager.Instance.MovementDuration;
-            transform.DOMove(targetPosition, duration)
-                .SetEase(MovementManager.Instance.Ease)
-                .OnComplete(() => _moveCompletionSource.TrySetResult());
+            float stretchDuration = 0.08f;
+            float unstretchDuration = 0.1f;
+            
+            // Stretch scale based on direction
+            Vector3 stretchScale = GetStretchScale(direction);
+            
+            // Create sequence: stretch -> move -> unstretch
+            Sequence sequence = DOTween.Sequence();
+            
+            // Stretch before movement starts
+            sequence.Append(transform.DOScale(stretchScale, stretchDuration).SetEase(Ease.OutQuad));
+            
+            // Move while stretched
+            sequence.Join(transform.DOMove(targetPosition, duration + stretchDuration)
+                .SetEase(MovementManager.Instance.Ease));
+            
+            // Unstretch at the end
+            sequence.Append(transform.DOScale(Vector3.one, unstretchDuration).SetEase(Ease.OutBack));
+            
+            sequence.OnComplete(() => _moveCompletionSource.TrySetResult());
+            sequence.SetLink(gameObject);
             
             return _moveCompletionSource;
+        }
+
+        private Vector3 GetStretchScale(InputDirection direction)
+        {
+            float stretchAmount = 1.3f;
+            float compressAmount = 0.85f;
+            
+            return direction switch
+            {
+                // Up/Down: stretch on Z axis (forward/back in world), compress X
+                InputDirection.Up => new Vector3(compressAmount, 1f, stretchAmount),
+                InputDirection.Down => new Vector3(compressAmount, 1f, stretchAmount),
+                // Left/Right: stretch on X axis, compress Z
+                InputDirection.Left => new Vector3(stretchAmount, 1f, compressAmount),
+                InputDirection.Right => new Vector3(stretchAmount, 1f, compressAmount),
+                _ => Vector3.one
+            };
         }
 
         private void OnTriggerEnter(Collider other)
