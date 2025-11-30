@@ -1,3 +1,4 @@
+using Core.Scripts.Gameplay.Levels;
 using Core.Scripts.Gameplay.Managers;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -57,10 +58,29 @@ namespace Core.Scripts.Gameplay.Panels
 
             _starOne.gameObject.SetActive(remainingMoves >= levelData.OneStarMinMoves);
             _starTwo.gameObject.SetActive(remainingMoves >= levelData.TwoStarMinMoves);
-            _starThree.gameObject.SetActive(remainingMoves >= levelData.ThreeStarMinMoves);
+
+            // 3. yıldız: Eğer level'da collectable varsa, tümü toplanmadan 3 yıldız verilmeyecek
+            var collectedCollectableCount = LevelManager.Instance.CollectedCollectableCount;
+            int totalCollectableCount = 0;
+            if (levelData.Tiles != null)
+            {
+                for (int i = 0; i < levelData.Tiles.Length; i++)
+                {
+                    if (levelData.Tiles[i].Type == TileType.Collectable)
+                    {
+                        totalCollectableCount++;
+                    }
+                }
+            }
+
+            bool hasCollectables = totalCollectableCount > 0;
+            bool hasEnoughMovesForThreeStars = remainingMoves >= levelData.ThreeStarMinMoves;
+            bool collectedAllCollectables = !hasCollectables || collectedCollectableCount >= totalCollectableCount;
+
+            _starThree.gameObject.SetActive(hasEnoughMovesForThreeStars && collectedAllCollectables);
             
             // Enerji (collectable) sayısını güncelle
-            _energyCountTMP.text = $"{LevelManager.Instance.CollectedCollectableCount}";
+            _energyCountTMP.text = $"{collectedCollectableCount}";
         }
     }
 }
